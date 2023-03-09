@@ -40,17 +40,17 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.get('/:id', (req, res) => {
-  const idea = ideas.find(idea => idea.id === +req.params.id)
-
-  if (!idea) {
-    return res.status(404).json({ success: false, error: 'Resource not found' })
+router.get('/:id', async (req, res) => {
+  try {
+    const idea = await Idea.findById(req.params.id)
+    res.json({
+      success: true,
+      data: idea,
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ success: false, error: 'Something went wrong' })
   }
-
-  res.json({
-    success: true,
-    data: idea,
-  })
 })
 
 // add an idea
@@ -70,36 +70,33 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.put('/:id', (req, res) => {
-  const idea = ideas.find(idea => idea.id === +req.params.id)
-
-  if (!idea) {
-    return res.status(404).json({ success: false, error: 'Resource not found' })
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedIdea = await Idea.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: { text: req.body.text, tag: req.body.tag },
+      },
+      { new: true }
+    )
+    res.json({ success: true, data: updatedIdea })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ success: false, error: 'Something went wrong' })
   }
-
-  idea.text = req.body.text || idea.text
-  idea.tag = req.body.tag || idea.tag
-
-  res.json({
-    success: true,
-    data: idea,
-  })
 })
 
-router.delete('/:id', (req, res) => {
-  const idea = ideas.find(idea => idea.id === +req.params.id)
-
-  if (!idea) {
-    return res.status(404).json({ success: false, error: 'Resource not found' })
+router.delete('/:id', async (req, res) => {
+  try {
+    await Idea.findByIdAndDelete(req.params.id)
+    res.json({
+      success: true,
+      data: {},
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ success: false, error: 'Something went wrong' })
   }
-
-  const index = ideas.indexOf(idea)
-  ideas.splice(index, 1)
-
-  res.json({
-    success: true,
-    data: {},
-  })
 })
 
 module.exports = router
