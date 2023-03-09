@@ -1,6 +1,6 @@
 const express = require('express')
-
 const router = express.Router()
+const Idea = require('../models/Idea')
 
 const ideas = [
   {
@@ -26,11 +26,18 @@ const ideas = [
   },
 ]
 
-router.get('/', (req, res) => {
-  res.json({
-    success: true,
-    data: ideas,
-  })
+// res.json({success: true,data: ideas,})
+
+router.get('/', async (req, res) => {
+  try {
+    const ideas = await Idea.find()
+    res.json({
+      success: true,
+      data: ideas,
+    })
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Something went wrong' })
+  }
 })
 
 router.get('/:id', (req, res) => {
@@ -47,18 +54,20 @@ router.get('/:id', (req, res) => {
 })
 
 // add an idea
-router.post('/', (req, res, next) => {
-  const idea = {
-    id: ideas.length + 1,
+router.post('/', async (req, res, next) => {
+  const idea = new Idea({
     text: req.body.text,
     tag: req.body.tag,
     username: req.body.username,
-    date: new Date().toISOString().slice(0, 10),
+  })
+
+  try {
+    const savedIdea = await idea.save()
+    res.json({ success: true, data: idea })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ success: false, error: 'Something went wrong' })
   }
-
-  ideas.push(idea)
-
-  res.json({ success: true, data: idea })
 })
 
 router.put('/:id', (req, res) => {

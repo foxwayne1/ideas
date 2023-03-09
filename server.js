@@ -1,5 +1,10 @@
 const express = require('express')
+require('dotenv').config()
 const ideasRoutes = require('./routes/ideas.routes')
+const PORT = process.env.PORT || 3001
+const connectDb = require('./config/db')
+
+connectDb()
 
 const app = express()
 
@@ -11,6 +16,6 @@ app.get('/', (req, res) => {
 })
 app.use('/api/ideas', ideasRoutes)
 
-app.listen(3000, () => {
-  console.log(`listening at http://localhost:3000`)
+app.listen(PORT, () => {
+  console.log(`listening at http://localhost:${PORT}`)
 })
